@@ -39,14 +39,21 @@ class ConsumeCommand extends Command
      */
     public function handle()
     {
-        $connection = new AMQPStreamConnection('localhost', 5672, 'guest', 'guest');
+        $connection = new AMQPStreamConnection(
+            config('rabbitmq.host'),
+            config('rabbitmq.port'),
+            config('rabbitmq.user'),
+            config('rabbitmq.password')
+        );
+
         $channel = $connection->channel();
 
         echo " [*] Waiting for messages. To exit press CTRL+C\n";
 
 
         $callback = function ($msg) {
-            echo ' [x] Received: ', $msg->body, "\n";
+            $data = json_decode($msg->body);
+            print_r($data);
         };
 
         $channel->basic_consume('laravel_que', '', false, true, false, false, $callback);
